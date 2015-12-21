@@ -1,0 +1,25 @@
+{
+  "name": "d3_demo",
+  "authors": [
+    "Cain.Chu <cainmaila@gmail.com>"
+  ],
+  "description": "",
+  "main": "index.html",
+  "moduleType": [],
+  "keywords": [
+    "d3"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.5.12"
+  }
+}
