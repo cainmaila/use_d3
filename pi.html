@@ -1,71 +1,322 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<title>D3圓餅圖</title>
-		<style type="text/css">
 
-			text {
-				font-family: sans-serif;
-				font-size: 12px;
-				fill: white;
-			}
+<head>
+	<meta charset="utf-8">
+	<title>D3圓餅圖</title>
+	<style type="text/css">
+		#demo text {
+			font-family: sans-serif;
+			font-size: 24px;
+			fill: white;
+		}
 
-		</style>
-	</head>
-	<body>
-        <div id="demo"></div>
-	</body>
-    <script src="bower_components/d3/d3.min.js"></script>
-    <script type="text/javascript">
+		#demo {
+			position: relative;
+		}
 
-        //Width and height
-        var w = 300;
-        var h = 300;
+		#d1 {
+			position: absolute;
+			left: 0;
+		}
 
-        var dataset = [ 5, 10, 20, 45, 6, 25 ];
+		#d2 {
+			position: absolute;
+			left: 100px;
+			top: 100px;
+		}
 
-        var outerRadius = w / 2;
-        var innerRadius = 50;
-        var arc = d3.svg.arc()
-                        .innerRadius(innerRadius) //內徑
-                        .outerRadius(outerRadius); //外徑
+		#demo2 {
+			position: relative;
+			top: 450px;
+			width: 240px;
+			height: 120px;
+		}
 
-        var pie = d3.layout.pie();
+		.liquidFillGaugeText {
+			font-family: Helvetica;
+			font-weight: bold;
+		}
+		.axis.x path {
+			/*stroke: DodgerBlue;*/
+			stroke-width: 1;
+			fill: none;
+		}
+		.axis {
+			font-size: 14px;
+			font-family: sans-serif;
+		}
 
-        //使用10種顏色的比例尺
-        var color = d3.scale.category10();
+		.axis path {
+			stroke: #fafafa;
+		}
 
-        //Create SVG element
-        var svg = d3.select("#demo")
-                    .append("svg")
-                    .attr("width", w)
-                    .attr("height", h);
+		.axis line {
+			stroke: lightgrey;
+		}
 
-        //Set up groups
-        var arcs = svg.selectAll("g.arc")
-                      .data(pie(dataset))
-                      .enter()
-                      .append("g")
-                      .attr("class", "arc")
-                      .attr("transform", "translate(" + outerRadius + "," + outerRadius + ")");
+		.axis .minor {
+			stroke-opacity: 1;
+		}
 
-        //Draw arc paths
-        arcs.append("path")
-            .attr("fill", function(d, i) {
-                return color(i);
-            })
-            .attr("d", arc);
+		#info{
+			position: absolute;
+			top : 0px;
+			left : 0px;
+			display: none;
+			width: auto;
+			height: 50px;
+			line-height: 50px;
+			padding-left: 20px;
+			padding-right: 20px;
+			background-color: #ffffee;
+			text-align: center;
+			margin-top: -25px;
+			margin-left: 20px;
+			border-width:1px;
+			border-style:solid;
+			border-radius: 10px;
+			box-shadow:4px 4px 3px rgba(20%,20%,40%,0.2);
+		}
+	</style>
+</head>
 
-        //Labels
-        arcs.append("text")
-            .attr("transform", function(d) {
-                return "translate(" + arc.centroid(d) + ")";
-            })
-            .attr("text-anchor", "middle")
-            .text(function(d) {
-                return d.value;
-            });
+<body>
+	<div id="demo">
+		<div id="d1"></div>
+		<div id="d2">
+			<svg id="fillgauge1" width="200" height="200"></svg>
+		</div>
+	</div>
+	<div id="demo2"></div>
+	<div id="info">info view</div>
+</body>
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="bower_components/d3/d3.min.js"></script>
+<script src="plugin/liquidFillGauge.js"></script>
+<script>
+	var config1 = liquidFillGaugeDefaultSettings();
+	// config1.circleColor = "#FF7777";
+	// config1.textColor = "#FF4444";
+	// config1.waveTextColor = "#FFAAAA";
+	// config1.waveColor = "#FFDDDD";
+	// config1.circleThickness = 0.2;
+	// config1.textVertPosition = 0.2;
+	config1.waveAnimateTime = 700; //波形速度，越小愈快
+	var gauge1 = loadLiquidFillGauge("fillgauge1", 55, config1);
+</script>
+<script type="text/javascript">
+	//Width and height
+	var w = 400;
+	var h = 400;
 
-    </script>
+	var dataset = [5, 10, 20, 45, 6, 25];
+
+	var outerRadius = w / 2;
+	var innerRadius = 100;
+	var arc = d3.svg.arc()
+		.innerRadius(innerRadius) //內徑
+		.outerRadius(outerRadius); //外徑
+	var arc2 = d3.svg.arc()
+		.innerRadius(innerRadius) //內徑
+		.outerRadius(innerRadius); //外徑
+
+	var pie = d3.layout.pie();
+
+	//使用10種顏色的比例尺
+	var color = d3.scale.category20c();
+
+	//Create SVG element
+	var svg = d3.select("#d1")
+		.append("svg")
+		.attr("width", w)
+		.attr("height", h);
+
+	//Set up groups
+	var tmp,t_color='#666666';
+	var arcs = svg.selectAll("g.arc")
+		.data(pie(dataset))
+		.enter()
+		.append("g")
+		.attr("class", "arc")
+		.attr("transform", "translate(" + outerRadius + "," + outerRadius + ")")
+		.on('mouseover',function (data) {
+			tmp = d3.select(d3.event.target).attr('fill');
+			d3.select(d3.event.target).attr('fill',t_color);
+			infoView.setTxt(data.value);
+		})
+		.on('mousemove',function (data) {
+			infoView.restPo();
+		}).on('mouseout',function (data) {
+			d3.select(d3.event.target).attr('fill',tmp);
+			infoView.off();
+		});
+
+	var infoView = {
+		view: $('#info'),
+		setTxt:function (txt_) {
+			this.view.html(txt_);
+			this.view.css('display','block');
+			this.restPo();
+		},
+		restPo:function () {
+			this.view.css({
+				top:d3.event.pageY,
+				left:d3.event.pageX
+			});
+		},
+		off:function () {
+			this.view.css('display','none');
+		}
+	};
+
+	//Draw arc paths
+	arcs.append("path")
+		.attr("fill", function(d, i) {
+
+			return color(i);
+		})
+		.transition() //套用動態效果
+		.duration(1250) //動態持續時間
+		.ease("cubic-out")
+		.each('start', function(d) { //過場開始執行
+			d3.select(this)
+				.attr('d', arc2);
+			// console.log(d);
+		})
+		.attr("d", arc);
+
+	//Labels
+	arcs.append("text")
+		.attr("transform", function(d) {
+			return "translate(" + arc.centroid(d) + ")";
+		})
+		.attr("text-anchor", "middle")
+		.text(function(d) {
+			return d.value;
+		});
+</script>
+<script>
+	var data = [{
+		x: 0,
+		y: 10,
+		z: 10
+	}, {
+		x: 20,
+		y: 27,
+		z: 15
+	}, {
+		x: 40,
+		y: 56,
+		z: 39
+	}, {
+		x: 60,
+		y: 34,
+		z: 45
+	}, {
+		x: 80,
+		y: 41,
+		z: 88
+	}, {
+		x: 100,
+		y: 35,
+		z: 74
+	}, {
+		x: 120,
+		y: 100,
+		z: 55
+	}, {
+		x: 140,
+		y: 57,
+		z: 75
+	}, {
+		x: 160,
+		y: 36,
+		z: 44
+	}, {
+		x: 180,
+		y: 41,
+		z: 30
+	}, {
+		x: 200,
+		y: 10,
+		z: 10
+	}];
+	//增加一個SVG元素
+	var ww = 700;
+	var hh = 200;
+	var svg_root = d3.select('#demo2').append('svg');
+	var svg = svg_root
+		.attr({
+			'width': ww,
+			'height': hh + 50,
+		})
+		.append('g'); //增加一個群組g
+	var xScale = d3.scale.linear().domain([0, 200]).range([50, ww-20]);
+	var yScale = d3.scale.linear().domain([120, 0]).range([50, hh]);
+	// 增加x軸線，tickSize是軸線的垂直高度，-h會往上拉高
+	var xAxis = d3.svg.axis().scale(xScale).orient('bottom').tickSize(-hh+50).tickSubdivide(true);
+	svg_root.append('g')
+		.attr('class', 'x axis')
+		.attr('transform', 'translate(0,' + hh + ')')
+		.on('mouseover',function (data) {
+			console.log(this);
+			// d3.select(d3.event.target,function (aa) {
+			// 	console.log(aa);
+			// })
+		})
+		.call(xAxis);
+	var yAxisLeft = d3.svg.axis().scale(yScale).ticks(4).orient('left');
+	svg_root.append('g')
+		.attr('class', 'y axis')
+		.attr('transform', 'translate(50,0)')
+		.call(yAxisLeft);
+	var area = d3.svg.area()
+		.x(function(d) {
+			return xScale(d.x);
+		})
+		.y0(hh)
+		.y1(function(d) {
+			return yScale(d.y);
+		});
+	var area_init = d3.svg.area()
+		.x(function(d) {
+			return xScale(d.x);
+		})
+		.y0(hh)
+		.y1(function(d) {
+			return yScale(0);
+		});
+
+	svg.append('path')
+		.transition() //套用動態效果
+		.delay(1000)
+		.duration(1250) //動態持續時間
+		.ease("cubic-out")
+		.each('start', function(d) { //過場開始執行
+			d3.select(this)
+				.attr('d', area_init(data));
+		})
+		.attr({
+			'd': area(data),
+			'stroke': '#c00',
+			'fill': 'rgba(255,0,0,.3)'
+		});
+
+	var area2 = d3.svg.area()
+		.x(function(d) {
+			return xScale(d.x);
+		})
+		.y0(hh)
+		.y1(function(d) {
+			return yScale(d.z);
+		});
+	svg.append('path')
+		.attr({
+			'd': area2(data),
+			'stroke': '#ccc',
+			'fill': 'rgba(0,0,255,.1)'
+		});
+</script>
+
 </html>
