@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>資料綁定</title>
+</head>
+<style>
+    body {
+        margin-left: 0px;
+    }
+</style>
+
+<body>
+    <div id="demo">
+
+    </div>
+</body>
+<script src="bower_components/d3/d3.min.js"></script>
+<script>
+    //建構
+    var data = ['a', 'b', 'c', 'd'];
+    var data_bind = d3.select("#demo").selectAll("div").data(data);
+    var div_set = data_bind.enter().append("div").text(function(d, i) {
+            return d;
+        })
+        .style({
+            'margin-left': '0px'
+        })
+        .transition()
+        .duration(1000)
+        .style({
+            'margin-left': '100px'
+        });
+    //綁定key
+    data_bind = d3.select("#demo").selectAll("div").data(data, function(d) {
+        return d;
+    });
+    //資料變換
+    setTimeout(function() {
+        data_bind = d3.select("#demo").selectAll("div").data(["m", 'd', 'e'], function(d) {
+            return d;
+        });
+        div_set = data_bind.enter().append("div").text(function(d, i) {
+                return d;
+            })
+            .style({
+                'margin-left': '0px'
+            })
+            .transition()
+            .duration(1000)
+            .style({
+                'margin-left': '100px'
+            });
+        data_bind.exit().transition()
+            .duration(1000)
+            .style({
+                'margin-left': '0px'
+            }).remove();
+    }, 2000);
+</script>
+
+</html>
